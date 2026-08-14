@@ -1,0 +1,62 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+
+local SuckSpeed = 10 
+_G.isSuck = false
+_G.AboudSuckLoop = nil
+
+local function ToggleSuck(state, targetName)
+    if _G.AboudSuckLoop then 
+        _G.AboudSuckLoop:Disconnect()
+        _G.AboudSuckLoop = nil 
+    end
+    
+    _G.isSuck = state
+    
+    if state then
+        local TargetPlayer = Players:FindFirstChild(targetName)
+        if not TargetPlayer then
+            warn("اللاعب غير موجود في السيرفر!")
+            return
+        end
+
+        _G.AboudSuckLoop = RunService.Heartbeat:Connect(function()
+            if not _G.isSuck or not TargetPlayer then return end
+            
+            local myChar = LocalPlayer.Character
+            local myHum = myChar and myChar:FindFirstChild("Humanoid")
+            local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
+            
+            local tChar = TargetPlayer.Character
+            local tHum = tChar and tChar:FindFirstChild("Humanoid")
+            local tHead = tChar and tChar:FindFirstChild("Head")
+            
+            if not myChar or not myHum or myHum.Health <= 0 then return end
+            if not tChar or not tHum or tHum.Health <= 0 or not tHead then return end
+            
+            pcall(function()
+                myHum.Sit = true 
+                local move = math.sin(tick() * SuckSpeed) * 1.5 
+                myRoot.CFrame = tHead.CFrame * CFrame.new(0, 0.2, -0.5 + move) * CFrame.Angles(0, math.rad(180), 0)
+                myRoot.Velocity = Vector3.new(0, 0, 0)
+            end)
+        end)
+    else
+        pcall(function()
+            local myChar = LocalPlayer.Character
+            local myHum = myChar and myChar:FindFirstChild("Humanoid")
+            local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
+            
+            if myHum then 
+                myHum.Sit = false 
+                myHum:ChangeState(Enum.HumanoidStateType.RunningNoPhysics) 
+            end
+            
+            if myRoot then 
+                myRoot.Velocity = Vector3.new(0,0,0)
+                myRoot.RotVelocity = Vector3.new(0,0,0) 
+            end
+        end)
+    end
+end
