@@ -1,0 +1,474 @@
+--[=[
+    ABD HUB PRO - Golden Edition v2.1 (Savannah Life)
+    Developed by: ABOUD_F1
+]=]
+
+local CoreGui = game:GetService("CoreGui")
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local Lighting = game:GetService("Lighting")
+local LocalPlayer = Players.LocalPlayer
+
+-- مؤثر صوتي
+local function playClick()
+    local snd = Instance.new("Sound")
+    snd.SoundId = "rbxassetid://8503529139"
+    snd.Volume = 1
+    snd.Parent = CoreGui
+    snd:Play()
+    game.Debris:AddItem(snd, 1)
+end
+
+-- ==========================================
+-- 1. واجهة النظام والزر العائم
+-- ==========================================
+local ABDGui = Instance.new("ScreenGui")
+ABDGui.Name = "ABDHUBPRO_Golden"
+ABDGui.Parent = CoreGui
+
+local FloatingBtn = Instance.new("ImageButton")
+FloatingBtn.Size = UDim2.new(0, 50, 0, 50)
+FloatingBtn.Position = UDim2.new(0, 20, 0, 20) 
+FloatingBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 18)
+FloatingBtn.Image = "rbxassetid://7734068321" 
+FloatingBtn.Parent = ABDGui
+Instance.new("UICorner", FloatingBtn).CornerRadius = UDim.new(1, 0)
+Instance.new("UIStroke", FloatingBtn).Color = Color3.fromRGB(128, 0, 32)
+FloatingBtn.UIStroke.Thickness = 2
+
+local fDragging, fDragInput, fDragStart, fStartPos
+FloatingBtn.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        fDragging = true; fDragStart = input.Position; fStartPos = FloatingBtn.Position
+        input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then fDragging = false end end)
+    end
+end)
+FloatingBtn.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then fDragInput = input end
+end)
+UserInputService.InputChanged:Connect(function(input)
+    if input == fDragInput and fDragging then
+        FloatingBtn.Position = UDim2.new(fStartPos.X.Scale, fStartPos.X.Offset + (input.Position - fDragStart).X, fStartPos.Y.Scale, fStartPos.Y.Offset + (input.Position - fDragStart).Y)
+    end
+end)
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 550, 0, 360)
+MainFrame.Position = UDim2.new(0.5, -275, 0.5, -180)
+MainFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 14) 
+MainFrame.BorderSizePixel = 0
+MainFrame.Visible = false 
+MainFrame.Parent = ABDGui
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
+Instance.new("UIStroke", MainFrame).Color = Color3.fromRGB(128, 0, 32)
+MainFrame.UIStroke.Thickness = 1.5
+
+FloatingBtn.MouseButton1Click:Connect(function() playClick(); MainFrame.Visible = not MainFrame.Visible end)
+
+local TitleBar = Instance.new("Frame")
+TitleBar.Size = UDim2.new(1, 0, 0, 40)
+TitleBar.BackgroundTransparency = 1
+TitleBar.Parent = MainFrame
+
+local TitleText = Instance.new("TextLabel")
+TitleText.Size = UDim2.new(1, -50, 1, 0)
+TitleText.Position = UDim2.new(0, 15, 0, 0)
+TitleText.BackgroundTransparency = 1
+TitleText.Text = "ABD HUB PRO | v2.0 Golden Edition"
+TitleText.TextColor3 = Color3.fromRGB(240, 240, 240)
+TitleText.Font = Enum.Font.GothamBold
+TitleText.TextSize = 15
+TitleText.TextXAlignment = Enum.TextXAlignment.Left
+TitleText.Parent = TitleBar
+
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Size = UDim2.new(0, 24, 0, 24)
+CloseBtn.Position = UDim2.new(1, -35, 0.5, -12)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+CloseBtn.Text = "X"
+CloseBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+CloseBtn.Parent = TitleBar
+Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(1, 0)
+CloseBtn.MouseButton1Click:Connect(function() 
+    playClick()
+    ABDGui:Destroy() 
+end)
+
+local dragging, dragInput, dragStart, startPos
+TitleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true; dragStart = input.Position; startPos = MainFrame.Position
+        input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then dragging = false end end)
+    end
+end)
+TitleBar.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end
+end)
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + (input.Position - dragStart).X, startPos.Y.Scale, startPos.Y.Offset + (input.Position - dragStart).Y)
+    end
+end)
+
+local SideBar = Instance.new("Frame")
+SideBar.Size = UDim2.new(0, 160, 1, -41)
+SideBar.Position = UDim2.new(0, 0, 0, 41)
+SideBar.BackgroundColor3 = Color3.fromRGB(16, 16, 18)
+SideBar.BorderSizePixel = 0
+SideBar.Parent = MainFrame
+Instance.new("UICorner", SideBar).CornerRadius = UDim.new(0, 10)
+local TabLayout = Instance.new("UIListLayout")
+TabLayout.Padding = UDim.new(0, 5)
+TabLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+TabLayout.Parent = SideBar
+Instance.new("Frame", SideBar).Size = UDim2.new(1, 0, 0, 10)
+
+local PagesContainer = Instance.new("Frame")
+PagesContainer.Size = UDim2.new(1, -170, 1, -50)
+PagesContainer.Position = UDim2.new(0, 165, 0, 45)
+PagesContainer.BackgroundTransparency = 1
+PagesContainer.Parent = MainFrame
+
+local tabs, pages = {}, {}
+local function createTab(name, isFirst)
+    local tabBtn = Instance.new("TextButton")
+    tabBtn.Size = UDim2.new(0.9, 0, 0, 35)
+    tabBtn.BackgroundColor3 = isFirst and Color3.fromRGB(128, 0, 32) or Color3.fromRGB(25, 25, 30)
+    tabBtn.Text = name
+    tabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    tabBtn.Font = Enum.Font.GothamSemibold
+    tabBtn.TextSize = 13
+    tabBtn.Parent = SideBar
+    Instance.new("UICorner", tabBtn).CornerRadius = UDim.new(0, 6)
+    table.insert(tabs, tabBtn)
+
+    local page = Instance.new("ScrollingFrame")
+    page.Size = UDim2.new(1, 0, 1, 0)
+    page.BackgroundTransparency = 1
+    page.ScrollBarThickness = 3
+    page.ScrollBarImageColor3 = Color3.fromRGB(128, 0, 32)
+    page.Visible = isFirst
+    page.Parent = PagesContainer
+    table.insert(pages, page)
+
+    local pageLayout = Instance.new("UIListLayout")
+    pageLayout.Padding = UDim.new(0, 8)
+    pageLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+    pageLayout.Parent = page
+
+    tabBtn.MouseButton1Click:Connect(function()
+        playClick()
+        for _, t in ipairs(tabs) do TweenService:Create(t, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(25, 25, 30)}):Play() end
+        for _, p in ipairs(pages) do p.Visible = false end
+        TweenService:Create(tabBtn, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(128, 0, 32)}):Play()
+        page.Visible = true
+    end)
+    return page
+end
+
+local function createToggle(page, text, callback)
+    local toggleFrame = Instance.new("Frame")
+    toggleFrame.Size = UDim2.new(0.95, 0, 0, 45)
+    toggleFrame.BackgroundColor3 = Color3.fromRGB(22, 22, 26)
+    toggleFrame.Parent = page
+    Instance.new("UICorner", toggleFrame).CornerRadius = UDim.new(0, 8)
+
+    local lbl = Instance.new("TextLabel")
+    lbl.Size = UDim2.new(0.7, 0, 1, 0)
+    lbl.Position = UDim2.new(0, 15, 0, 0)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = text
+    lbl.TextColor3 = Color3.fromRGB(220, 220, 220)
+    lbl.Font = Enum.Font.GothamMedium
+    lbl.TextSize = 12
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    lbl.Parent = toggleFrame
+
+    local switchBg = Instance.new("TextButton")
+    switchBg.Size = UDim2.new(0, 44, 0, 24)
+    switchBg.Position = UDim2.new(1, -55, 0.5, -12)
+    switchBg.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+    switchBg.Text = ""
+    switchBg.Parent = toggleFrame
+    Instance.new("UICorner", switchBg).CornerRadius = UDim.new(1, 0)
+
+    local switchCircle = Instance.new("Frame")
+    switchCircle.Size = UDim2.new(0, 20, 0, 20)
+    switchCircle.Position = UDim2.new(0, 2, 0.5, -10)
+    switchCircle.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+    switchCircle.Parent = switchBg
+    Instance.new("UICorner", switchCircle).CornerRadius = UDim.new(1, 0)
+
+    local toggled = false
+    switchBg.MouseButton1Click:Connect(function()
+        playClick()
+        toggled = not toggled
+        if toggled then
+            TweenService:Create(switchBg, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(128, 0, 32)}):Play()
+            TweenService:Create(switchCircle, TweenInfo.new(0.2), {Position = UDim2.new(1, -22, 0.5, -10), BackgroundColor3 = Color3.fromRGB(255, 255, 255)}):Play()
+        else
+            TweenService:Create(switchBg, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(40, 40, 45)}):Play()
+            TweenService:Create(switchCircle, TweenInfo.new(0.2), {Position = UDim2.new(0, 2, 0.5, -10), BackgroundColor3 = Color3.fromRGB(200, 200, 200)}):Play()
+        end
+        callback(toggled)
+    end)
+end
+
+-- ==========================================
+-- 2. الثغرات المدمجة (Combat Tab)
+-- ==========================================
+local combatTab = createTab("Combat | قتال", true)
+
+-- [ طاقة لانهائية ]
+local infiniteStamina = false
+createToggle(combatTab, "Infinite Stamina | طاقة لانهائية", function(state) infiniteStamina = state end)
+RunService.RenderStepped:Connect(function()
+    if infiniteStamina and LocalPlayer.Character then
+        local char = LocalPlayer.Character
+        for _, obj in ipairs(char:GetDescendants()) do
+            if (obj:IsA("NumberValue") or obj:IsA("IntValue")) and (obj.Name:lower():match("stamina") or obj.Name:lower():match("energy")) then
+                obj.Value = 100
+            end
+        end
+        for attrName, attrValue in pairs(char:GetAttributes()) do
+            local lowerName = attrName:lower()
+            if type(attrValue) == "number" and (lowerName:match("stamina") or lowerName:match("energy")) then
+                char:SetAttribute(attrName, 100)
+            end
+        end
+    end
+end)
+
+-- [ صائد المفترسات ]
+local hunterActive = false
+local currentTarget = nil
+local function getNearestTarget()
+    local nearest, maxDist = nil, 300
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+            local myHrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if myHrp then
+                local dist = (p.Character.HumanoidRootPart.Position - myHrp.Position).Magnitude
+                if dist < maxDist then maxDist, nearest = dist, p.Character end
+            end
+        end
+    end
+    return nearest
+end
+
+createToggle(combatTab, "Predator Hunter | صائد المفترسات", function(state)
+    hunterActive = state
+    currentTarget = state and getNearestTarget() or nil
+end)
+RunService.RenderStepped:Connect(function()
+    if hunterActive then
+        if currentTarget and currentTarget:FindFirstChild("Humanoid") and currentTarget.Humanoid.Health > 0 and currentTarget:FindFirstChild("HumanoidRootPart") then
+            local myHrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if myHrp then myHrp.CFrame = currentTarget.HumanoidRootPart.CFrame * CFrame.new(0, 0.5, 2.5) end
+        else
+            currentTarget = getNearestTarget()
+        end
+    end
+end)
+
+-- [ دماء لا تنتهي (God Mode) - اعتراض السيرفر (Hooking) ]
+local godMode = false
+local oldNamecall
+oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
+    local method = getnamecallmethod()
+    
+    if godMode and method == "FireServer" then
+        if self.Name == "PlayerDamageSelfRemoteEvent" or self.Name == "TrampleDamageHandlerRemoteEvent" then
+            return 
+        end
+    end
+    
+    return oldNamecall(self, ...)
+end)
+
+createToggle(combatTab, "God Mode | دماء لا تنتهي", function(state) 
+    godMode = state 
+end)
+
+RunService.RenderStepped:Connect(function()
+    if godMode then
+        local playerScripts = LocalPlayer:FindFirstChild("PlayerScripts")
+        if playerScripts then
+            local fallScript = playerScripts:FindFirstChild("FallDamageHandler", true)
+            if fallScript and fallScript:IsA("LocalScript") and not fallScript.Disabled then
+                fallScript.Disabled = true
+            end
+        end
+    end
+end)
+
+-- ==========================================
+-- 3. ميزات إضافية (Visuals Tab)
+-- ==========================================
+local visualTab = createTab("Visuals | رؤية", false)
+
+-- [ توسيع الرؤية (Wide FOV) ]
+local fovActive = false
+local camera = workspace.CurrentCamera
+
+createToggle(visualTab, "Wide FOV | رؤية واسعة", function(state)
+    fovActive = state
+    if not fovActive and camera then
+        camera.FieldOfView = 70 
+    end
+end)
+RunService.RenderStepped:Connect(function()
+    if fovActive and camera then
+        camera.FieldOfView = 120
+    end
+end)
+
+-- [ كشف أماكن الحيوانات (ESP) ]
+local espActive = false
+local espObjects = {}
+
+local animalData = {
+    ["lion"] = {color = Color3.fromRGB(255, 255, 0), name = "أسد"},
+    ["cheetah"] = {color = Color3.fromRGB(255, 165, 0), name = "فهد"},
+    ["leopard"] = {color = Color3.fromRGB(255, 215, 0), name = "نمر مرقط"},
+    ["tiger"] = {color = Color3.fromRGB(255, 140, 0), name = "نمر"},
+    ["elephant"] = {color = Color3.fromRGB(128, 128, 128), name = "فيل"},
+    ["rhino"] = {color = Color3.fromRGB(169, 169, 169), name = "وحيد القرن"},
+    ["hippo"] = {color = Color3.fromRGB(112, 128, 144), name = "فرس النهر"},
+    ["crocodile"] = {color = Color3.fromRGB(34, 139, 34), name = "تمساح"},
+    ["zebra"] = {color = Color3.fromRGB(255, 255, 255), name = "حمار وحشي"},
+    ["gazelle"] = {color = Color3.fromRGB(0, 255, 0), name = "غزال"},
+    ["giraffe"] = {color = Color3.fromRGB(218, 165, 32), name = "زرافة"},
+    ["buffalo"] = {color = Color3.fromRGB(101, 67, 33), name = "جاموس"},
+    ["bull"] = {color = Color3.fromRGB(139, 69, 19), name = "ثور"},
+    ["warthog"] = {color = Color3.fromRGB(160, 82, 45), name = "خنزير بري"},
+    ["boar"] = {color = Color3.fromRGB(139, 69, 19), name = "خنزير"},
+    ["wilddog"] = {color = Color3.fromRGB(139, 69, 19), name = "كلب بري"},
+    ["hyena"] = {color = Color3.fromRGB(85, 107, 47), name = "ضبع"},
+    ["monkey"] = {color = Color3.fromRGB(205, 133, 63), name = "قرد"},
+    ["baboon"] = {color = Color3.fromRGB(184, 134, 11), name = "قرد البابون"},
+    ["porcupine"] = {color = Color3.fromRGB(105, 105, 105), name = "قنفذ"},
+    ["hedgehog"] = {color = Color3.fromRGB(105, 105, 105), name = "قنفذ"},
+    ["meerkat"] = {color = Color3.fromRGB(222, 184, 135), name = "ميركات"},
+    ["ostrich"] = {color = Color3.fromRGB(200, 200, 200), name = "نعامة"},
+    ["eagle"] = {color = Color3.fromRGB(184, 134, 11), name = "نسر"},
+    ["vulture"] = {color = Color3.fromRGB(47, 79, 79), name = "نسر جارح"},
+    ["flamingo"] = {color = Color3.fromRGB(255, 105, 180), name = "فلامينجو"},
+    ["bird"] = {color = Color3.fromRGB(135, 206, 235), name = "طائر"}
+}
+
+local function getAnimalInfo(character)
+    local animalName = character:GetAttribute("AnimalName")
+    local charName = character:GetAttribute("CharacterName")
+
+    if animalName then
+        local safeName = string.lower(string.gsub(animalName, "%s+", ""))
+        if animalData[safeName] then return animalData[safeName] end
+    end
+    if charName == "StarterCharacter2" then return animalData["wilddog"] end
+    return {color = Color3.fromRGB(255, 0, 0), name = "حيوان مجهول"} 
+end
+
+local function clearESP(player)
+    if espObjects[player] then
+        if espObjects[player].Highlight then espObjects[player].Highlight:Destroy() end
+        if espObjects[player].Billboard then espObjects[player].Billboard:Destroy() end
+        espObjects[player] = nil
+    end
+end
+
+createToggle(visualTab, "Animal ESP | كشف الحيوانات", function(state)
+    espActive = state
+    if not espActive then
+        for player, _ in pairs(espObjects) do clearESP(player) end
+    end
+end)
+
+RunService.RenderStepped:Connect(function()
+    if espActive then
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer then
+                local char = player.Character
+                local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                local humanoid = char and char:FindFirstChild("Humanoid")
+                local myHrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+
+                if char and hrp and humanoid and humanoid.Health > 0 and myHrp then
+                    local info = getAnimalInfo(char)
+                    local distance = math.floor((hrp.Position - myHrp.Position).Magnitude) 
+                    
+                    if not espObjects[player] or not espObjects[player].Highlight.Parent or espObjects[player].Highlight.Parent ~= char then
+                        clearESP(player) 
+                        
+                        local hl = Instance.new("Highlight")
+                        hl.Name = "ABDESP_HL"
+                        hl.FillTransparency = 0.5
+                        hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+                        hl.Parent = char
+                        
+                        local bg = Instance.new("BillboardGui")
+                        bg.Name = "ABDESP_BG"
+                        bg.Size = UDim2.new(0, 200, 0, 40)
+                        bg.StudsOffset = Vector3.new(0, 3, 0) 
+                        bg.AlwaysOnTop = true
+                        bg.Parent = char
+                        
+                        local txt = Instance.new("TextLabel")
+                        txt.Size = UDim2.new(1, 0, 1, 0)
+                        txt.BackgroundTransparency = 1
+                        txt.Font = Enum.Font.GothamBold
+                        txt.TextSize = 14
+                        txt.TextStrokeTransparency = 0 
+                        txt.Parent = bg
+                        
+                        espObjects[player] = { Highlight = hl, Billboard = bg, Text = txt }
+                    end
+                    
+                    local objs = espObjects[player]
+                    objs.Highlight.FillColor = info.color
+                    objs.Text.Text = info.name .. " | " .. distance .. "m"
+                    objs.Text.TextColor3 = info.color
+                else
+                    clearESP(player)
+                end
+            end
+        end
+    end
+end)
+
+Players.PlayerRemoving:Connect(function(player) clearESP(player) end)
+
+-- ==========================================
+-- 4. التحكم بالبيئة والأجواء (World & Lighting)
+-- ==========================================
+local worldTab = createTab("World | العالم", false)
+
+-- [ إضاءة ساطعة ونهار دائم ]
+local fullBright = false
+createToggle(worldTab, "FullBright | نهار دائم", function(state)
+    fullBright = state
+    if not fullBright then Lighting.GlobalShadows = true end
+end)
+
+-- [ إزالة الضباب كلياً ]
+local noFog = false
+createToggle(worldTab, "No Fog | إزالة الضباب", function(state)
+    noFog = state
+end)
+
+RunService.RenderStepped:Connect(function()
+    if fullBright then
+        Lighting.ClockTime = 12
+        Lighting.Brightness = 2 
+        Lighting.GlobalShadows = false 
+        Lighting.OutdoorAmbient = Color3.fromRGB(255, 255, 255) 
+    end
+    
+    if noFog then
+        Lighting.FogEnd = 100000 
+        local atmosphere = Lighting:FindFirstChildOfClass("Atmosphere")
+        if atmosphere then atmosphere.Density = 0 end
+    end
+end)
